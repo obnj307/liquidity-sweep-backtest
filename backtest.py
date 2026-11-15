@@ -40,7 +40,7 @@ def download(days, out):
             t=int(r[0]);timestamps.append(t)
             if earliest<=t<now and t+BAR_MS<=now:
                 found[t]=(t,float(r[1]),float(r[2]),float(r[3]),float(r[4]))
-        next_end=min(timestamps)-BAR_MS
+        next_end=min(timestamps)+BAR_MS
         if next_end>=end: raise RuntimeError('Pagination stalled')
         end=next_end
         if len(found)%10000<200: print(f'Downloaded {len(found)} bars, earliest {datetime.fromtimestamp(min(found)/1000,timezone.utc).date()}',flush=True)
