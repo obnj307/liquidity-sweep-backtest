@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Run backtest
-        run: python backtest.py --days '${{ inputs.days }}'
+        run: python backtest.py --csv btc_m5.csv --out results
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
