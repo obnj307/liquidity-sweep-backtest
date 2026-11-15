@@ -1,0 +1,27 @@
+name: BTC M5 MFE MAE (4h)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'mfe_mae.py'
+      - 'backtest_v2.py'
+      - '.github/workflows/mfe-mae.yml'
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check historical candles
+        run: test -f btc_m5.csv || (echo 'Upload btc_m5.csv to repository root first' && exit 1)
+      - name: Run four-hour MFE MAE analysis
+        run: python mfe_mae.py --csv btc_m5.csv --out results
+      - name: Upload analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-mfe-mae-4h
+          path: results/*.csv
+          if-no-files-found: warn
