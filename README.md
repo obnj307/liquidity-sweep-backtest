@@ -1,13 +1,15 @@
-# BTC Liquidity Sweep + CHoCH V2 — Research backtest
+# BTCUSDT M5 – 4-hour MFE/MAE research
 
-Run locally or in GitHub Actions with Python 3.11 (standard library only):
+Based on the **V2 Liquidity Sweep + CHoCH** setup definition (`backtest_v2.py`). No orders are placed.
 
-```bash
-python backtest_v2.py --csv btc_m5.csv --out results
-```
+## GitHub Android installation
 
-Outputs: `summary_v2.csv`, `trades_v2.csv`. No trading or Telegram messages.
+Copy `mfe_mae.py` and `backtest_v2.py` to the repository root, alongside `btc_m5.csv` (the historical candles). Add `.github/workflows/mfe-mae.yml` with exactly this path. Open **Actions → BTC M5 MFE MAE (4h) → Run workflow**. Download artifact **btc-mfe-mae-4h**.
 
-Rules: confirmed 5-left/5-right swing pivots, minimum pivot prominence 0.5 previous ATR(14), minimum sweep penetration 0.1 ATR, return within 0.5 ATR of level, consumed levels, fixed CHoCH threshold from 12 preceding bars, CHoCH within 6 candles, stop beyond sweep extreme by 0.1 ATR, next-bar-open entry, RR 1/1.5/2, target distance >= 2x modeled roundtrip costs, 48-bar maximum hold. Conservative SL-first on ambiguous intrabar touches. 70% train / 30% chronological test. Fees 6 bps/side, slippage 2 bps/side.
+## Results
 
-Limitations: heuristic CHoCH definition, no intrabar path, funding/spread not separately modeled, 180-day sample, limited trade count, no parameter selection/optimization. Compounded returns assume full-notional reinvestment and are not a realistic risk-sized portfolio model. No claim of profitable strategy.
+- `excursions.csv`: MFE and MAE per confirmed signal over 48 candles from next M5 open, including entry bar; USD price moves and times.
+- `overview.csv`: median MFE, MAE and times, separately for train (first 70%) and test (last 30%).
+- `sl_tp_grid.csv`: first-touch outcomes for 6 stop distances × 7 take-profit distances, by window 100/500 and train/test. Percent distances are absolute percent of BTC entry price, **not** risk/reward ratios. Costs default to 6 bps fees + 2 bps slippage per side (16 bps round trip).
+
+**Important limitations:** M5 OHLC cannot establish intrabar ordering; same-bar SL+TP hits are conservatively scored as SL and counted in `ambiguous_same_bar`. Intrabar gap execution and actual spread/orderbook fills are not modeled. MFE and MAE maxima can occur in either order; do not treat MFE/MAE ratio as realized RR. `sl_tp_grid.csv` is a *per-signal, independent hypothetical trade study*: signals may overlap, so aggregate grid metrics do not represent a deployable portfolio or capital allocation. Cost model subtracts fixed round-trip bps, not actual fills. Comparing 42 grids on test data creates selection bias; choose parameters using train and reserve untouched future data for validation. No claims of profitability.
